@@ -1,0 +1,170 @@
+(GameState, LastChoice)
+(GameState, LastChoice)
+
+GameState
+{
+	global: {
+		agent_states: {
+			deck: stack_of_ordered_cards,
+			discard: stack_of_ordered_cards,
+			top_of_discard: 
+			hand: array_of_cards,
+			in_play: ordered_array,
+			actions_remaining: int,
+			buys_remaining: int,
+			turn_phase: action OR buy OR draw
+		},
+		supply,
+		trash,
+		current_player,
+		action_to_player,
+		current_instruction: Choice
+		played_stack: []? # things played off the stack so far
+		action_stack: [harbinger]	# stack items have action player
+	},
+}
+
+
+CardStack
+	include add card, remove card, has_card, 
+GameController
+	should log all things for debugging
+	include games state serializer
+GameState
+AgentState
+InstructionStack
+Instruction
+Card
+Choice
+
+
+Clients
+	CommandLineClient
+	RandomChoiceClient
+	BigMoneyClient
+
+
+
+
+bitmap stuff out of card stack goes where?
+
+who has seen what?
+	CardStack has visibility bitmaps for each player
+	Each player has
+	{
+		'p1': {
+			'deck': {
+				index: card
+			}
+		}
+	}
+
+Action
+
+1. Choose either skip action phase or choose action to play
+	played throne room
+		choose other action to be target of throne room
+			play harbinger
+				draw
+				choose from discard
+			play harbinger
+				draw
+				choose from discard
+
+[tr, tr]
+[milita, milita, tr]
+[p1_special_choice, p2_discard_to_3, militia, tr]
+
+
+
+[choose_action_to_play]
+
+Instruction
+
+Choice(Instruction)
+	""" Instruction that contains a player choice"""
+
+
+Mechanical(Instrunction)
+	+2 money
+	draw a card
+	+ 1 action
+	discard top card, if action play it
+	player x gains a curse
+
+
+
+Card
+	has Instructions or effects
+
+
+
+
+D) Instruction is simply declaritive and game engine contains state transition logic
+OR
+E) Instruction manipulate the state itself
+
+
+Open Question
+	How to hide access to executing instruction from client
+		dont pass the instruction object
+			ChooseFromDiscardInstrunction
+			CardChoice
+				CardStack
+			ChooseFromDiscardInstruction.execute(game_state, choice)
+	Moat registers itself globally and checks players hands or register when it enters a hand		
+
+
+
+Clockwise everyone gains curse
+	D)
+		game engine has logic for both draw and executing clockwise instruction and gain a card
+	E) Instruction contains a method which gets access to GameState and pushes "Gain a curse" instrunction onto stack for each player going clockwise
+
+
+
+ToDo
+	how to handle triggers like royal seal
+
+
+
+Treasure Playing Phase
+	[]
+	play 2 hoards
+	[]
+Buy Phase
+	[buy, buy, buy]
+	buy [buy, buy] choose province
+
+
+
+[buy, buy, buy]
+
+buy
+[buy, buy, gain choice]
+
+
+Instructions need to define events
+	Buy
+		triggers (buy, card)
+
+
+Choice
+	CardChoice
+		cause?
+		range of number of cards to choose (0-1)
+		card stack to choose from
+		card stack name (discard, deck)?
+		card destination (discard, deck, in play)
+	BinaryChoice
+
+
+
+
+
+Library
+	put library onto stack
+	pop library off stack
+	push draw_until_7_with_optional_discard onto stack
+	pop that off
+	push d7 and choice_to_discard onto stack
