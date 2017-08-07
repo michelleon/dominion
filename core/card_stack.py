@@ -6,9 +6,10 @@ from core.card_distribution import CardDistribution
 
 class CardStack:
     """
-    general CardStack class
+    An ordered stack of cards.
     """
-    def __init__(self, initial_card_list = []):
+    def __init__(self, initial_card_list=None):
+        initial_card_list = initial_card_list or []
         self.distribution = CardDistribution(initial_card_list)
         self._stack = deque(initial_card_list)
 
