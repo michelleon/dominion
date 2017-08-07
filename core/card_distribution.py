@@ -24,7 +24,10 @@ class CardDistribution:
     def deepcopy(self):
         distribution = CardDistribution()
         distribution._card_counter = deepcopy(self._card_counter)
-        return distribution 
+        return distribution
+
+    def size(self):
+        return sum(self._card_counter.values())
 
     def __eq__(self, other):
         return self._card_counter == other._card_counter

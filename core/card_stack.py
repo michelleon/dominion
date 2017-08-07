@@ -18,6 +18,10 @@ class CardStack:
         self.distribution.add(card)
         self._stack.appendleft(card)
 
+    def empty(self):
+        self._stack = deque()
+        self.distribution = CardDistribution([])
+
     # Use case: when removing from hand or picking from discard
     def extract(self, card):
         self.distribution.subtract(card)
@@ -26,6 +30,9 @@ class CardStack:
 
     def has_card(self, card):
         return self.distribution.count(card) > 0
+
+    def is_empty(self):
+        return len(self._stack) == 0
 
     def draw(self, amount):
         return [self._stack.popleft() for i in xrange(amount)]
