@@ -22,7 +22,8 @@ class DrawCardsInstruction(Instruction):
         number_left_to_draw = self.number_to_draw
         cards = []
         while True:
-            drawn_cards = player_state.draw_pile.draw(number_left_to_draw)
+            number_to_draw_now = min(player_state.draw_pile.size(), number_left_to_draw)
+            drawn_cards = player_state.draw_pile.draw(number_to_draw_now)
             logger.info('%s drew %d cards.' % (target_player, len(drawn_cards)))
             cards.extend(drawn_cards)
             if len(cards) == self.number_to_draw:
