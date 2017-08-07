@@ -5,7 +5,8 @@ class CardDistribution:
     """
     Represents cards to counts mapping
     """
-    def __init__(self, initial_card_list=[]):
+    def __init__(self, initial_card_list=None):
+        initial_card_list = initial_card_list or []
         self._card_counter = Counter(initial_card_list)
 
     def count(self, card):
