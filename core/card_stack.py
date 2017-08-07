@@ -6,9 +6,10 @@ from core.card_distribution import CardDistribution
 
 class CardStack:
     """
-    general CardStack class
+    An ordered stack of cards.
     """
-    def __init__(self, initial_card_list = []):
+    def __init__(self, initial_card_list=None):
+        initial_card_list = initial_card_list or []
         self.distribution = CardDistribution(initial_card_list)
         self._stack = deque(initial_card_list)
 
@@ -27,7 +28,7 @@ class CardStack:
         return self.distribution.count(card) > 0
 
     def draw(self, amount):
-        return [self._stack.popleft() for i in xrange(amount)]
+        return [self._stack.popleft() for i in range(amount)]
 
     def shuffle(self):
         shuffle(self._stack)
