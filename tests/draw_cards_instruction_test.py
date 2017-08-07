@@ -1,7 +1,8 @@
 import unittest
 
-from base_set.instructions.draw_cards_instruction import DrawCardsInstruction
+from base_set.instructions import DrawCardsInstruction
 from core.card_distribution import CardDistribution
+from core.game_state import CURRENT_PLAYER
 from core.game_state import GameState
 
 
@@ -45,6 +46,28 @@ class DrawCardsInstructionTest(unittest.TestCase):
             'Players hand pile is larger by the number of drawn cards.'
         )
         self.assertTrue(logger.has_logged_msg('p1 drew 5 cards.'))
+
+    def test_target_is_current_player(self):
+        game_state = self.create_game_state()
+        current_player = game_state.get_current_turn_player()
+        player_state = game_state.get_player_state(current_player)
+        cards_in_draw_pile_before_draw = player_state.draw_pile.size()
+        cards_in_hand_before_draw = player_state.hand.size()
+        number_to_draw = 5
+        instruction = DrawCardsInstruction(number_to_draw=number_to_draw, target_player=CURRENT_PLAYER)
+        logger = TestLogger()
+        instruction.execute(game_state, logger=logger)
+        cards_in_draw_pile_after_draw = player_state.draw_pile.size()
+        cards_in_hand_after_draw = player_state.hand.size()
+        self.assertEqual(
+            cards_in_draw_pile_after_draw + number_to_draw, cards_in_draw_pile_before_draw,
+            'Players draw pile is smaller by the number of drawn cards.'
+        )
+        self.assertEqual(
+            cards_in_hand_after_draw - number_to_draw, cards_in_hand_before_draw,
+            'Players hand pile is larger by the number of drawn cards.'
+        )
+        self.assertTrue(logger.has_logged_msg('%s drew 5 cards.' % current_player))
 
 
 if __name__ == '__main__':

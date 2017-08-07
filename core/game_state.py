@@ -5,6 +5,9 @@ from core.card_stack import CardStack
 from core.player_state import PlayerState
 
 
+CURRENT_PLAYER = object()
+
+
 class GameState(object):
     """
     Contains all global game state.
@@ -54,6 +57,9 @@ class GameState(object):
         new_state._event_stack = deque(self._event_stack[:])
         new_state._resolved_events = deque(self._resolved_events[:])
         return new_state
+
+    def get_current_turn_player(self):
+        return self.player_names[self._current_turn]
 
     def get_player_state(self, player_name):
         return self._player_states[player_name]

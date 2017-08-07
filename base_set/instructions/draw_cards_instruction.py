@@ -1,3 +1,4 @@
+from core.game_state import CURRENT_PLAYER
 from core.instruction import Instruction
 
 
@@ -14,12 +15,15 @@ class DrawCardsInstruction(Instruction):
         self.target_player = target_player
 
     def execute(self, game_state, logger):
-        player_state = game_state.get_player_state(self.target_player)
+        target_player = self.target_player
+        if target_player == CURRENT_PLAYER:
+            target_player = game_state.get_current_turn_player()
+        player_state = game_state.get_player_state(target_player)
         number_left_to_draw = self.number_to_draw
         cards = []
         while True:
             drawn_cards = player_state.draw_pile.draw(number_left_to_draw)
-            logger.info('%s drew %d cards.' % (self.target_player, len(drawn_cards)))
+            logger.info('%s drew %d cards.' % (target_player, len(drawn_cards)))
             cards.extend(drawn_cards)
             if len(cards) == self.number_to_draw:
                 break
