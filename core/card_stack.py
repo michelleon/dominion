@@ -35,7 +35,7 @@ class CardStack:
         return len(self._stack) == 0
 
     def draw(self, amount):
-        return [self._stack.popleft() for i in xrange(amount)]
+        return [self._stack.popleft() for i in range(amount)]
 
     def shuffle(self):
         shuffle(self._stack)

@@ -12,31 +12,31 @@ class CardStackTest(unittest.TestCase):
     def test_add(self):
         self.card_stack.add('b')
         self.assertTrue(self.card_stack.has_card('b'))
-        self.assertEquals(self.card_stack.distribution.count('b'), 1)
+        self.assertEqual(self.card_stack.distribution.count('b'), 1)
 
     def test_extract(self):
         self.card_stack.extract('a')
         self.assertFalse(self.card_stack.has_card('a'))
-        self.assertEquals(self.card_stack.distribution.count('a'), 0)
+        self.assertEqual(self.card_stack.distribution.count('a'), 0)
 
     def test_size(self):
-        self.assertEquals(self.card_stack.size(), 1)
+        self.assertEqual(self.card_stack.size(), 1)
         self.card_stack.add('b')
-        self.assertEquals(self.card_stack.size(), 2)
+        self.assertEqual(self.card_stack.size(), 2)
 
     def test_draw(self):
         self.card_stack.add('a')
         self.card_stack.add('b')
         self.card_stack.add('c')
-        self.assertEquals(self.card_stack.draw(2), ['c', 'b'])
-        self.assertEquals(self.card_stack.size(), 2)
+        self.assertEqual(self.card_stack.draw(2), ['c', 'b'])
+        self.assertEqual(self.card_stack.size(), 2)
 
     def test_shuffle(self):
         self.card_stack.add('b')
         self.card_stack.add('c')
         self.card_stack.shuffle()
 
-        self.assertEquals(self.card_stack.size(), 3)
+        self.assertEqual(self.card_stack.size(), 3)
         self.assertTrue(self.card_stack.has_card('a'))
         self.assertTrue(self.card_stack.has_card('b'))
         self.assertTrue(self.card_stack.has_card('c'))
@@ -44,7 +44,7 @@ class CardStackTest(unittest.TestCase):
         stack = CardStack(['a', 'b', 'c'])
         unshuffled_stack = stack.deepcopy()
         found_difference = False
-        for _ in xrange(10):
+        for _ in range(10):
             stack.shuffle()
             if stack._stack != unshuffled_stack._stack:
                 found_difference = True
@@ -56,9 +56,9 @@ class CardStackTest(unittest.TestCase):
     def test_deep_copy(self):
         self.card_stack.add('b')
         stack_copy = self.card_stack.deepcopy()
-        self.assertEquals(self.card_stack.size(), stack_copy.size())
-        self.assertEquals(self.card_stack._stack, stack_copy._stack)
-        self.assertEquals(self.card_stack.distribution, stack_copy.distribution)
+        self.assertEqual(self.card_stack.size(), stack_copy.size())
+        self.assertEqual(self.card_stack._stack, stack_copy._stack)
+        self.assertEqual(self.card_stack.distribution, stack_copy.distribution)
 
 
 if __name__ == '__main__':

@@ -14,7 +14,7 @@ class GameStateTest(unittest.TestCase):
         game_state = GameState(player_names=names, supply=supply, starting_cards=starting_cards)
         for name in names:
             player_state = game_state.get_player_state(name)
-            self.assertEquals(
+            self.assertEqual(
                 player_state.draw_pile.distribution, CardDistribution(starting_cards),
                 'Each player has the starting cards in their draw pile.'
             )
