@@ -5,6 +5,6 @@ from base_set.instructions import DrawCardsInstruction
 
 
 class Smithy(Card):
-	card_types = (Action,)
+	card_types = (CardType.ACTION,)
 	base_treasure_cost = 4
 	instructions = (DrawCardsInstruction(number_to_draw=3, target_player=CURRENT_PLAYER),)
