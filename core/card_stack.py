@@ -27,7 +27,7 @@ class CardStack:
         return self.distribution.count(card) > 0
 
     def draw(self, amount):
-        return [self._stack.popleft() for i in xrange(amount)]
+        return [self._stack.popleft() for i in range(amount)]
 
     def shuffle(self):
         shuffle(self._stack)
