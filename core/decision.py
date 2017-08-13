@@ -53,34 +53,10 @@ class Decision:
         return True
 
 class PlayTreasureDecision(Decision):
-    def __init__(self, options, min, max):
-        """
-        Parameters:
-            options (list): List of possible choices.
-            min (int): Minimum number of the choices that must be chosen.
-            max (int): Maximum number of the choices that must be chosen.
-        """
-        super(PlayTreasureDecision, self).__init__(options, min, max)
-        self.name = "play_treasure_decision"
+    pass
 
-class ActionDecision(Decision):
-    def __init__(self, options, min, max):
-        """
-        Parameters:
-            options (list): List of possible choices.
-            min (int): Minimum number of the choices that must be chosen.
-            max (int): Maximum number of the choices that must be chosen.
-        """
-        super(ActionDecision, self).__init__(options, min, max)
-        self.name = "action_decision"
+class PlayActionDecision(Decision):
+    pass
 
 class BuyDecision(Decision):
-    def __init__(self, options, min, max):
-        """
-        Parameters:
-            options (list): List of possible choices.
-            min (int): Minimum number of the choices that must be chosen.
-            max (int): Maximum number of the choices that must be chosen.
-        """
-        super(BuyDecision, self).__init__(options, min, max)
-        self.name = "buy_decision"
+    pass

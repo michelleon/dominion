@@ -5,7 +5,7 @@ from core.card import CardType
 from core.card_distribution import CardDistribution
 from core.counters import CounterId
 from core.counters import CounterName
-from core.decision import ActionDecision
+from core.decision import PlayActionDecision
 from core.decision import BuyDecision
 from core.decision import PlayTreasureDecision
 from core.game_state import GameState
@@ -134,9 +134,9 @@ class GameController(object):
           player: Player agent object
 
         Returns:
-            ActionDecision with options being all action cards in player's hand
+            PlayActionDecision with options being all action cards in player's hand
         """
-        return ActionDecision(options=self.action_cards_in_hand(player), min=0, max=1)
+        return PlayActionDecision(options=self.action_cards_in_hand(player), min=0, max=1)
 
     def generate_play_treasures_decision(self, player):
         """
