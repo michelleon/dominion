@@ -1,14 +1,16 @@
 import itertools
 from random import sample
 
-from core.locations import Location
-from core.locations import LocationName
+from core.card import CardType
+from core.card_distribution import CardDistribution
 from core.counters import CounterId
 from core.counters import CounterName
-from core.decision import BuyDecision
 from core.decision import ActionDecision
-from core.decision import PlayTreasuresDecision
+from core.decision import BuyDecision
+from core.decision import PlayTreasureDecision
 from core.game_state import GameState
+from core.locations import Location
+from core.locations import LocationName
 
 from base_set.cards import GoldCard
 from base_set.cards import SilverCard
@@ -74,14 +76,14 @@ class GameController(object):
         """
         # TODO cards need hasRandomizer method
         randomizer_cards = [x for x in self.card_set if x.hasRandomizer()]
-        kingdom_cards = sample(randomizer_cards, 10) * INITIAL_SUPPLY_COUNT
+        kingdom_cards = sample(randomizer_cards, 1) * INITIAL_SUPPLY_COUNT
         treasure_cards = (
             [GoldCard] * STARTING_GOLD_SUPPLY +
             [SilverCard] * STARTING_SILVER_SUPPLY +
-            [CopperCard * STARTING_COPPER_SUPPLY]
+            [CopperCard] * STARTING_COPPER_SUPPLY
         )
 
-        victory_starting_supply = STARTING_VICTORY_CARD_SUPPLY_BY_PLAYER_COUNT[self.player_count]
+        victory_starting_supply = STARTING_VICTORY_CARD_SUPPLY_BY_PLAYER_COUNT[self.num_players]
         victory_cards = [[card] * victory_starting_supply for card in [EstateCard, DuchyCard, ProvinceCard]]
         flattened_victory_cards = list(itertools.chain.from_iterable(victory_cards))
         
@@ -96,7 +98,7 @@ class GameController(object):
         )
 
     def next_player_index(self):
-        return ( self.player_index + 1 ) % self.player_count
+        return ( self.player_index + 1 ) % self.num_players
 
     def actions_left(self):
         return self.game_state.get_counter(CounterId(None, CounterName.ACTIONS))
@@ -142,9 +144,11 @@ class GameController(object):
           player: Player agent object
 
         Returns:
-            PlayTreasuresDecision with options being all treasure cards in player's hand
+            PlayTreasureDecision with options being all treasure cards in player's hand
         """
-        pass
+        hand_stack = self.game_state.get_location(Location(player.name(), LocationName.HAND))
+        treasures_in_hand = [card for card in hand_stack if CardType.TREASURE in card.types]
+        return PlayTreasureDecision(options=treasures_in_hand, min=0, max=len(treasures_in_hand))
 
     def take_buy_action(self, player, card):
         """
@@ -194,11 +198,12 @@ class GameController(object):
         #################
 
         starting_supply = self.get_starting_supply()
-        starting_deck = get_starting_deck()
+        starting_deck = self.get_starting_deck()
         self.game_state = GameState(
-            self.players.map(lambda x: x.name()),
+            list(map(lambda x: x.name(), self.players)),
             starting_supply,
-            starting_deck
+            starting_deck,
+            self.log
         )
         
         for player in self.players:
@@ -212,13 +217,13 @@ class GameController(object):
         # Gameplay loop
         #################
         
-        while not self.game_over():
+        while not self.game_over:
             # Fetch the next player
             player = self.players[self.player_index]
 
             ### Action phase
             while (
-                self.actions_left() > 0 &&
+                self.actions_left() > 0 and
                 len(self.action_cards_in_hand(player)) > 0
             ):
                 decision = self.generate_action_decision(player)
@@ -231,7 +236,7 @@ class GameController(object):
             ### Buy phase
             decision = self.generate_play_treasures_decision(player)
             treasures = player.make_decision(decision) # expect choice to be arr of treasure cards
-            self.play_treasures(player, treasure)
+            self.play_treasures(player, treasures)
 
             while self.buys_left() > 0:
                 decision = self.generate_buy_decision(player)
