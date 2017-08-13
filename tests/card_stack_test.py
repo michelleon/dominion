@@ -52,13 +52,40 @@ class CardStackTest(unittest.TestCase):
 
         self.assertTrue(found_difference)
 
-
     def test_deep_copy(self):
         self.card_stack.add('b')
         stack_copy = self.card_stack.deepcopy()
         self.assertEqual(self.card_stack.size(), stack_copy.size())
         self.assertEqual(self.card_stack._stack, stack_copy._stack)
         self.assertEqual(self.card_stack.distribution, stack_copy.distribution)
+
+    def test_empty(self):
+        self.card_stack.empty()
+        self.assertEqual(self.card_stack.size(), 0, 'Stack size should be 0 after empty.')
+        self.assertEqual(
+            {}, self.card_stack.distribution.cards_to_counts(),
+            'Distribution should be empty after emptying.'
+        )
+
+    def test_to_list(self):
+        stack = CardStack([1, 2, 3])
+        self.assertEqual(stack.to_list(), [1, 2, 3])
+        stack.add(4)
+        self.assertEqual(stack.to_list(), [4, 1, 2, 3])
+
+    def test_put_other_stack_underneath(self):
+        stack = CardStack([1, 2, 3])
+        other = CardStack([4, 5, 6])
+        stack.put_other_stack_underneath(other)
+        self.assertEqual(stack.size(), 6)
+        self.assertEqual(other.size(), 0)
+        self.assertEqual(stack.distribution.size(), 6)
+        self.assertEqual(other.distribution.size(), 0)
+        cards = stack.draw(6)
+        self.assertEqual(
+            cards,
+            [1, 2, 3, 4, 5, 6]
+        )
 
 
 if __name__ == '__main__':

@@ -18,6 +18,13 @@ class CardDistribution:
     def add(self, card, amount = 1):
         self._card_counter[card] += amount
 
+    def add_list(self, cards):
+        for card in cards:
+            self._card_counter[card] += 1
+
+    def size(self):
+        return sum(self._card_counter.values())
+
     def subtract(self, card, amount = 1):
         self._card_counter.subtract({ card: amount })
 

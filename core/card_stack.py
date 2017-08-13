@@ -30,6 +30,30 @@ class CardStack:
     def draw(self, amount):
         return [self._stack.popleft() for i in range(amount)]
 
+    def add_to_bottom(self, card):
+        self.distribution.add(card)
+        self._stack.appendRight(card)
+
+    def put_other_stack_underneath(self, stack):
+        """
+        Adds another stack underneath this one. The other stack will be empty after this
+        operation.
+        """
+        cards = stack.to_list()
+        self._stack.extend(cards)
+        self.distribution.add_list(cards)
+        stack.empty()
+
+    def to_list(self):
+        """
+        Return all cards as a list.
+        """
+        return list(self._stack)
+
+    def empty(self):
+        self._stack = deque()
+        self.distribution  = CardDistribution()
+
     def shuffle(self):
         shuffle(self._stack)
 

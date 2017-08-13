@@ -29,5 +29,12 @@ class CardDistributionTest(unittest.TestCase):
         self.card_distribution.add('b')
         self.assertTrue(other == self.card_distribution)
 
+    def test_size(self):
+        dist = CardDistribution([1, 1, 2])
+        self.assertEqual(dist.size(), 3)
+        dist.subtract(1)
+        self.assertEqual(dist.size(), 2)
+        
+
 if __name__ == '__main__':
     unittest.main()
