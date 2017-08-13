@@ -51,3 +51,12 @@ class Decision:
                 return False
             opt_copy.remove(val)
         return True
+
+class PlayTreasureDecision(Decision):
+    pass
+
+class PlayActionDecision(Decision):
+    pass
+
+class BuyDecision(Decision):
+    pass
