@@ -15,6 +15,7 @@ from core.locations import LocationName
 from base_set.cards import GoldCard
 from base_set.cards import SilverCard
 from base_set.cards import CopperCard
+from base_set.cards import CurseCard
 
 from base_set.cards import EstateCard
 from base_set.cards import DuchyCard
@@ -71,12 +72,11 @@ class GameController(object):
         - choose 10 kingdom cards from card_set
         - initialize victory card supply
         - initalize treasure supply
-        - optionally initialize curse supply if Witch in play
-         ^ should be encoded on the Witch card ? 
+        - initialize curse supply if Witch in play
         """
         # TODO cards need hasRandomizer method
         randomizer_cards = [x for x in self.card_set if x.hasRandomizer()]
-        kingdom_cards = sample(randomizer_cards, 1) * INITIAL_SUPPLY_COUNT
+        kingdom_cards = sample(randomizer_cards, 10) * INITIAL_SUPPLY_COUNT
         treasure_cards = (
             [GoldCard] * STARTING_GOLD_SUPPLY +
             [SilverCard] * STARTING_SILVER_SUPPLY +
@@ -86,10 +86,11 @@ class GameController(object):
         victory_starting_supply = STARTING_VICTORY_CARD_SUPPLY_BY_PLAYER_COUNT[self.num_players]
         victory_cards = [[card] * victory_starting_supply for card in [EstateCard, DuchyCard, ProvinceCard]]
         flattened_victory_cards = list(itertools.chain.from_iterable(victory_cards))
-        
-        # TODO: add curses to supply when witch included
+
+        curse_starting_supply = STARTING_CURSE_SUPPLY_BY_PLAYER_COUNT[self.num_players]
+        curse_cards = [CurseCard] * curse_starting_supply
         # TODO: how to handle gardens etc. which depend on num_players
-        return CardDistribution(kingdom_cards + treasure_cards + flattened_victory_cards)
+        return CardDistribution(kingdom_cards + treasure_cards + flattened_victory_cards + curse_cards)
 
     def get_starting_deck(self):
         return (
@@ -205,13 +206,13 @@ class GameController(object):
             starting_deck,
             self.log
         )
-        
+
+        # TODO: inform Players of initial state for learning agents
         for player in self.players:
             # shuffle player decks
             self.game_state.shuffle(Location(player.name(), LocationName.DRAW_PILE))
             # draw starting hands
             self.game_state.draw(player.name(), NUM_CARDS_IN_HAND)   
-        # TODO: inform Players of initial state for learning agents
 
         #################
         # Gameplay loop
@@ -227,7 +228,7 @@ class GameController(object):
                 len(self.action_cards_in_hand(player)) > 0
             ):
                 decision = self.generate_action_decision(player)
-                action_card = player.make_decision(decision)
+                action_card = player.make_decision(decision)[0]
                 # TODO: validate choice legality
                 if not action_card:
                     break
@@ -240,7 +241,7 @@ class GameController(object):
 
             while self.buys_left() > 0:
                 decision = self.generate_buy_decision(player)
-                choice = player.make_decision(decision)
+                choice = player.make_decision(decision)[0]
                 # TODO: validate choice legality
                 if not choice:
                     break
