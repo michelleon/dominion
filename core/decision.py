@@ -17,6 +17,8 @@ class Decision:
         self.max = max
 
     def choose_random(self):
+        if not self.options:
+            return []
         num_to_choose = random.randint(self.min, self.max)
         opt_copy = self.options[:]
         res = []
