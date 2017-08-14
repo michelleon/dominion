@@ -43,12 +43,13 @@ class CardStack:
         position = position or StackPosition.TOP
         if type(cards) != list:
             cards = [cards]
-        for card in cards[::-1]:
+        for card in cards:
             self.distribution.add(card)
-            if position == StackPosition.TOP:
-                self._stack.appendleft(card)
-            else:
-                self._stack.append(card)
+        if position == StackPosition.TOP:
+            # Have to reverse cards because extendleft reverses them
+            self._stack.extendleft(cards[::-1])
+        else:
+            self._stack.extend(cards)
 
     def extract(self, cards):
         """

@@ -28,6 +28,13 @@ class CardStackTest(unittest.TestCase):
         cards = card_stack.draw(2)
         self.assertEqual(cards, ['c', 'a'])
 
+    def test_add_to_bottom(self):
+        card_stack = CardStack()
+        card_stack.add(['a', 'b', 'c'])
+        card_stack.add(['d', 'e', 'f'], position=StackPosition.BOTTOM)
+        cards = card_stack.draw(5)
+        self.assertEqual(cards, ['a', 'b', 'c', 'd', 'e'])
+
     def test_extract(self):
         card_stack = CardStack(['a', 'b', 'c', 'd', 'b', 'e'])
         extracted = card_stack.extract(['b'])
