@@ -1,5 +1,7 @@
 import unittest
+
 from core.card_distribution import CardDistribution
+
 
 class CardDistributionTest(unittest.TestCase):
     def setUp(self):
@@ -28,6 +30,24 @@ class CardDistributionTest(unittest.TestCase):
         self.card_distribution.add('a')
         self.card_distribution.add('b')
         self.assertTrue(other == self.card_distribution)
+
+    def test_size(self):
+        dist = CardDistribution([1, 1, 2])
+        self.assertEqual(dist.size(), 3)
+        dist.subtract(1)
+        self.assertEqual(dist.size(), 2)
+        
+    def test_iter(self):
+        dist = CardDistribution([1, 1, 2])
+        self.assertEqual(sorted(list(dist)), [1, 1, 2])
+        dist.subtract(2)
+        self.assertEqual(sorted(list(dist)), [1, 1])
+
+    def test_empty(self):
+        dist = CardDistribution([1, 1, 2])
+        dist.empty()
+        self.assertEqual(dist.size(), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
