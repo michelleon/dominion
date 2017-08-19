@@ -76,7 +76,7 @@ class GameController(object):
         """
         # TODO cards need hasRandomizer method
         randomizer_cards = [x for x in self.card_set if x.hasRandomizer()]
-        kingdom_cards = sample(randomizer_cards, 10) * INITIAL_SUPPLY_COUNT
+        kingdom_cards = sample(randomizer_cards, 2) * INITIAL_SUPPLY_COUNT
         treasure_cards = (
             [GoldCard] * STARTING_GOLD_SUPPLY +
             [SilverCard] * STARTING_SILVER_SUPPLY +
@@ -212,7 +212,7 @@ class GameController(object):
             # shuffle player decks
             self.game_state.shuffle(Location(player.name(), LocationName.DRAW_PILE))
             # draw starting hands
-            self.game_state.draw(player.name(), NUM_CARDS_IN_HAND)   
+            self.game_state.draw(NUM_CARDS_IN_HAND, player.name())
 
         #################
         # Gameplay loop
@@ -252,7 +252,7 @@ class GameController(object):
             self.game_state.discard_location(Location(player.name(), LocationName.HAND))
 
             ### Draw next hand
-            self.game_state.draw(player.name(), NUM_CARDS_IN_HAND)
+            self.game_state.draw(NUM_CARDS_IN_HAND, player.name())
 
             # TODO: inform Players of after turn state for learning agents
             
