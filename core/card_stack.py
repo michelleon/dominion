@@ -79,6 +79,13 @@ class CardStack:
     def shuffle(self):
         shuffle(self._stack)
 
+    def peek(self, index):
+        """
+        See what card is at the index without moving it. Index counts from the top of the
+        stack and starts at 0.
+        """
+        return self._stack[index]
+
     def size(self):
         return len(self._stack)
 
