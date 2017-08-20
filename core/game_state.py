@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 from core.card_stack import CardStack
 from core.card_stack import StackPosition
 from core.card_stack import UnorderedCardStack
@@ -100,6 +102,51 @@ class GameState:
             to_position=StackPosition.BOTTOM,
             event_type=CardEventType.MOVE,
         )
+
+    def get_state_known_to(self, player):
+        """
+        Returns a `ViewableGameState` that has the information the given player would be
+        able to see.
+        """
+        infos = []
+        # Completely public locations
+        current_player = self.get_current_player_name()
+        public_locations = (
+            Location(None, LocationName.SUPPLY),
+            Location(None, LocationName.TRASH),
+            Location(current_player, LocationName.IN_PLAY)
+        )
+        for location in public_locations:
+            stack = self.get_location(location).deepcopy()
+            infos.append(LocationInfo(location, stack, stack.size(), None))
+
+        # Discard piles, can only see the top card of each
+        for player_name in self.player_names:
+            location = Location(player_name, LocationName.DISCARD)
+            stack = self.get_location(location)
+            stack_size = stack.size()
+            if stack_size > 0:
+                stack_size = None
+                top_card = stack.peek(0)
+            else:
+                top_card = None
+            infos.append(LocationInfo(location, None, stack_size, top_card))
+
+        # Size of each player's hand and the contents of one's own hand
+        for player_name in self.player_names:
+            location = Location(player_name, LocationName.HAND)
+            stack = self.get_location(location)
+            if player_name == player:
+                infos.append(LocationInfo(location, stack.deepcopy(), stack.size(), None))
+                continue
+            infos.append(LocationInfo(location, None, stack.size(), None))
+
+        # Size of one's own draw pile
+        players_draw_pile = Location(player, LocationName.DRAW_PILE)
+        draw_pile_stack = self.get_location(players_draw_pile)
+        infos.append(LocationInfo(players_draw_pile, None, draw_pile_stack.size(), None))
+        counters = self._counters.copy()
+        return ViewableGameState(infos, counters, current_player, player)
 
     # ToDo(JM): Decide if we really want the game state to have knowledge of the agents.
     # This was a quick hack so that when a card needs to get an agent's decision on something
@@ -336,3 +383,41 @@ class GameState:
             to_position=None,
             event_type=CardEventType.TRASH  
         )
+
+
+LocationInfo = namedtuple('LocationInfo', ['location', 'stack', 'size', 'top_card'])
+LocationInfo.__doc__ = """
+Summary information about a location.
+
+Parameters:
+    location (`Location`): The location being summarized.
+    stack (optional, `CardStack`): The cards in the location. If None, then the cards are not
+        known.
+    size (optional, int): The number of cards in the location. If None, the number is not known.
+    top_card (optional, `Card`): The top card at the location. If None, the top card is not known.
+"""
+
+class ViewableGameState:
+    """
+    Represents the state that a player can see. This is differnt from game state
+    because it does not contain the complete state, only the state viewable by a specific
+    player.
+    """
+    def __init__(self, location_infos, counters, active_player, viewing_player):
+        self._location_infos = location_infos
+        info_by_location = {}
+        for info in location_infos:
+            info_by_location[info.location] = info
+        self._info_by_location = info_by_location
+        self.counters = counters
+        # The name of the player whose turn it is. Not necessarily the player currently making
+        # a decision.
+        self.active_player = active_player
+        self.viewing_player = viewing_player
+
+    def iter_location_info(self):
+        for info in self._location_infos:
+            yield info
+
+    def get_location_info(self, location):
+        return self._info_by_location.get(location, None)
