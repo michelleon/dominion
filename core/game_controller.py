@@ -136,8 +136,6 @@ class GameController(object):
             supply cards that the player can afford
         """
         money = self.money_in_play()
-        # TODO: get_available_cards impl in controller or state?
-        # available_cards = self.game_state.get_available_cards()
         available_cards = set(list(self.game_state.get_location(Location(None, LocationName.SUPPLY))))
         affordable_cards = [card for card in available_cards if card.cost(self.game_state) <= money]
         return BuyDecision(options=affordable_cards, min=0, max=1)
