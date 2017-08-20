@@ -100,7 +100,9 @@ class GameController(object):
         )
 
     def next_player_index(self):
-        return ( self.player_index + 1 ) % self.num_players
+        next_player = ( self.player_index + 1 ) % self.num_players
+        self.game_state._current_player_index = next_player
+        return next_player
 
     def actions_left(self):
         return self.game_state.get_counter(CounterId(None, CounterName.ACTIONS))
