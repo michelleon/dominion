@@ -11,10 +11,15 @@ class BaseAgent:
         """
         return self._name
 
-    def make_decision(self, decision):
+    def make_decision(self, decision, known_state=None):
         """
         Return a valid choice for the decision. The choice should return True when
         passed to deicions.is_valid(choice).
+
+        Parameters:
+            decicion (`Decision`): The decision to be made.
+            known_state (optional, `ViewableGameState`): The state known at the time of the
+                decision.
         """
         raise NotImplementedError()
         

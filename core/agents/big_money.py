@@ -17,7 +17,7 @@ class DumbMoneyAgent(BaseAgent):
     - Never buy Copper
     - If I have to make an play action decision choose one randomly
     """
-    def make_decision(self, decision):
+    def make_decision(self, decision, known_state=None):
         if isinstance(decision, PlayTreasureDecision):
             choice = decision.options
         elif isinstance(decision, BuyDecision):
@@ -43,7 +43,7 @@ class SimpleBmSmithyAgent(BaseAgent):
         super(SimpleBmSmithyAgent, self).__init__(*args, **kwargs)
         self._bought_a_smithy = False
 
-    def make_decision(self, decision):
+    def make_decision(self, decision, known_state=None):
         if isinstance(decision, PlayTreasureDecision):
             choice = decision.options
         elif isinstance(decision, BuyDecision):

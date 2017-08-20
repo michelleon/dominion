@@ -9,7 +9,7 @@ def _print_color(color, msg):
 
 
 class CommandLineAgent(BaseAgent):
-    def make_decision(self, decision):
+    def make_decision(self, decision, known_state=None):
         print('\nMake a %s decision:\n' % (decision.__class__.__name__))
         options_str = '\n'.join(
             ['%d) %s' % (i, str(opt)) for i, opt in enumerate(decision.options)]

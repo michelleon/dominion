@@ -202,6 +202,14 @@ class GameController(object):
             player_name_to_vp[player_name] = victory_points
         return player_name_to_vp
 
+    def give_decision(self, decision, agent):
+        """
+        Give the agent a decision and return it's choices.
+        """
+        viewable_state = self.game_state.get_state_known_to(agent.name())
+        choices = agent.make_decision(decision, viewable_state)
+        return choices
+
     def get_winner(self):
         """
         Returns player name with most VP
@@ -253,7 +261,7 @@ class GameController(object):
                 len(self.action_cards_in_hand(player)) > 0
             ):
                 decision = self.generate_action_decision(player)
-                choices = player.make_decision(decision)
+                choices = self.give_decision(decision, player)
                 action_card = choices[0] if choices else None
                 # TODO: validate choice legality
                 if not action_card:
@@ -264,12 +272,12 @@ class GameController(object):
 
             ### Buy phase
             decision = self.generate_play_treasures_decision(player)
-            treasures = player.make_decision(decision) # expect choice to be arr of treasure cards
+            treasures = self.give_decision(decision, player)
             self.play_treasures(player, treasures)
 
             while self.buys_left() > 0:
                 decision = self.generate_buy_decision(player)
-                choices = player.make_decision(decision)
+                choices = self.give_decision(decision, player)
                 choice = choices[0] if choices else None
                 # TODO: validate choice legality
                 if not choice:
