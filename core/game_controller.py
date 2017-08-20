@@ -110,12 +110,12 @@ class GameController(object):
     def buys_left(self):
         return self.game_state.get_counter(CounterId(None, CounterName.BUYS))
 
-    def money_in_play(self, player):
+    def money_in_play(self):
         return self.game_state.get_counter(CounterId(None, CounterName.COINS))
 
     def action_cards_in_hand(self, player):
         hand = self.game_state.get_location(Location(player.name(), LocationName.HAND))
-        return [card for card in hand if CardType.ACTION in card.types()]
+        return [card for card in hand if CardType.ACTION in card.types]
 
     def game_over(self):
         supply = self.game_state.get_location(Location(None, LocationName.SUPPLY))
@@ -137,7 +137,8 @@ class GameController(object):
         """
         money = self.money_in_play()
         # TODO: get_available_cards impl in controller or state?
-        available_cards = self.game_state.get_available_cards()
+        # available_cards = self.game_state.get_available_cards()
+        available_cards = set(list(self.game_state.get_location(Location(None, LocationName.SUPPLY))))
         affordable_cards = [card for card in available_cards if card.cost(self.game_state) <= money]
         return BuyDecision(options=affordable_cards, min=0, max=1)
 
@@ -171,7 +172,10 @@ class GameController(object):
 
         Moves card from supply to player discard pile
         """
-        pass
+        cost = card.cost(self.game_state)
+        self.game_state.update_counter(CounterId(None, CounterName.BUYS), -1)
+        self.game_state.update_counter(CounterId(None, CounterName.COINS), 0 - cost)
+        self.game_state.gain(card)
 
     def play_treasures(self, player, treasures):
         """
@@ -182,7 +186,9 @@ class GameController(object):
         Moves cards from HAND to IN_PLAY
         Increments COINS counter by the sum of `treasures`
         """
-        pass
+        for treasure in treasures:
+            self.game_state.play(treasure)
+            treasure.play(self.game_state)
 
     def player_name_to_vp(self):
         """
@@ -190,16 +196,20 @@ class GameController(object):
         Returns: map of player name to VP
         """
         player_name_to_vp = {}
-        for player_name in self.players.map(lambda p: p.name()):
+        for player_name in list(map(lambda p: p.name(), self.players)):
             deck = self.game_state.get_deck(player_name)
             victory_points = sum([card.victory_points(player_name, self.game_state) for card in deck])
             player_name_to_vp[player_name] = victory_points
+        return player_name_to_vp
 
     def get_winner(self):
         """
         Returns player name with most VP
         """
         player_name_to_vp = self.player_name_to_vp()
+        scores = list(player_name_to_vp.values())
+        if len(scores) == 2 and scores[0] == scores[1]:
+            return None
         return max(player_name_to_vp.keys(), key=(lambda k: player_name_to_vp[k]))
 
     def run(self):
@@ -240,11 +250,14 @@ class GameController(object):
                 len(self.action_cards_in_hand(player)) > 0
             ):
                 decision = self.generate_action_decision(player)
-                action_card = player.make_decision(decision)[0]
+                choices = player.make_decision(decision)
+                action_card = choices[0] if choices else None
                 # TODO: validate choice legality
                 if not action_card:
                     break
-                action_card.execute(self.game_state)
+                self.game_state.update_counter(CounterId(None, CounterName.ACTIONS), -1)
+                self.game_state.play(action_card)
+                action_card.play(self.game_state)
 
             ### Buy phase
             decision = self.generate_play_treasures_decision(player)
@@ -253,7 +266,8 @@ class GameController(object):
 
             while self.buys_left() > 0:
                 decision = self.generate_buy_decision(player)
-                choice = player.make_decision(decision)[0]
+                choices = player.make_decision(decision)
+                choice = choices[0] if choices else None
                 # TODO: validate choice legality
                 if not choice:
                     break
@@ -275,8 +289,12 @@ class GameController(object):
         #################
         # Resolve game
         #################
-        print(self.player_name_to_vp())
-        print(self.get_winner())
+        print('\nGAME OVER on Turn %d\n-----------------\n' % (turn_number / 2))
+        for name, vp in self.player_name_to_vp().items():
+            print('%s: %d' % (name, vp))
+        winner = self.get_winner()
+        print(('Winner: ' + winner) if winner else 'Tie')
+        return winner 
 
 
 
