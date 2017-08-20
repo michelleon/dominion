@@ -59,7 +59,6 @@ class GameController(object):
         self.players = players # array of agents
         self.num_players = len(players)
         # all agents need to implement a .name() method
-        self.game_over = False
         self.game_state = None
         # Array of cards that kingdom will be chosen from
         self.card_set = card_set
@@ -115,6 +114,15 @@ class GameController(object):
     def action_cards_in_hand(self, player):
         hand = self.game_state.get_location(Location(player.name(), LocationName.HAND))
         return [card for card in hand if CardType.ACTION in card.types()]
+
+    def game_over(self):
+        supply = self.game_state.get_location(Location(None, LocationName.SUPPLY))
+        if supply.distribution.count(ProvinceCard) == 0:
+            return True
+        cards_to_counts = supply.distribution.cards_to_counts()
+        if list(cards_to_counts.values()).count(0) >= 3:
+            return True
+        return False
 
     def generate_buy_decision(self, player):
         """
@@ -219,8 +227,8 @@ class GameController(object):
         #################
         # Gameplay loop
         #################
-        
-        while not self.game_over:
+        turn_number = 1
+        while not self.game_over():
             # Fetch the next player
             player = self.players[self.player_index]
 
@@ -260,6 +268,7 @@ class GameController(object):
             
             # rotate player index
             self.player_index = self.next_player_index()
+            turn_number += 1
 
         #################
         # Resolve game
