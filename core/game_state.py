@@ -101,6 +101,17 @@ class GameState:
             event_type=CardEventType.MOVE,
         )
 
+    # ToDo(JM): Decide if we really want the game state to have knowledge of the agents.
+    # This was a quick hack so that when a card needs to get an agent's decision on something
+    # it can find the agent from the game state (cards' play method just takes game state).
+    def set_agents(self, agents):
+        self._agents = agents
+
+    def get_agent(self, name):
+        for agent in self._agents:
+            if agent.name() == name:
+                return agent
+
     def get_current_player_name(self):
         """
         Return the name of the player whose turn it is. This is not necessarily the player

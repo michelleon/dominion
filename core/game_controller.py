@@ -228,8 +228,8 @@ class GameController(object):
             starting_deck,
             self.log
         )
-
         # TODO: inform Players of initial state for learning agents
+        self.game_state.set_agents(self.players)
         for player in self.players:
             # shuffle player decks
             self.game_state.shuffle(Location(player.name(), LocationName.DRAW_PILE))
@@ -243,8 +243,11 @@ class GameController(object):
         while not self.game_over():
             # Fetch the next player
             player = self.players[self.player_index]
+            ### Setup Phase
+            self.game_state.reset_counters_for_new_turn()
 
             ### Action phase
+
             while (
                 self.actions_left() > 0 and
                 len(self.action_cards_in_hand(player)) > 0
