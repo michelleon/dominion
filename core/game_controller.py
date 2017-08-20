@@ -2,7 +2,7 @@ import itertools
 from random import sample
 
 from core.card import CardType
-from core.card_distribution import CardDistribution
+from core.card_stack import UnorderedCardStack
 from core.counters import CounterId
 from core.counters import CounterName
 from core.decision import PlayActionDecision
@@ -90,7 +90,7 @@ class GameController(object):
         curse_starting_supply = STARTING_CURSE_SUPPLY_BY_PLAYER_COUNT[self.num_players]
         curse_cards = [CurseCard] * curse_starting_supply
         # TODO: how to handle gardens etc. which depend on num_players
-        return CardDistribution(kingdom_cards + treasure_cards + flattened_victory_cards + curse_cards)
+        return UnorderedCardStack(kingdom_cards + treasure_cards + flattened_victory_cards)
 
     def get_starting_deck(self):
         return (
