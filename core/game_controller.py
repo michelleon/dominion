@@ -33,6 +33,7 @@ NUM_COPPERS_IN_STARTING_HAND = 7
 NUM_CARDS_IN_HAND = 5
 NUM_KINGDOM_CARDS = 10
 INITIAL_SUPPLY_COUNT = 10
+MAX_TURNS = 300
 
 STARTING_VICTORY_CARD_SUPPLY_BY_PLAYER_COUNT = {
     2: 8,
@@ -296,6 +297,9 @@ class GameController(object):
             # rotate player index
             self.player_index = self.next_player_index()
             turn_number += 1
+            # Safety to avoid bots getting stuck in infinite game.
+            if turn_number > MAX_TURNS:
+                break
 
         #################
         # Resolve game
