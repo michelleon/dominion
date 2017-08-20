@@ -31,6 +31,7 @@ NUM_EMPTY_PILES_FOR_GAME_END = 3
 NUM_ESTATES_IN_STARTING_HAND = 3
 NUM_COPPERS_IN_STARTING_HAND = 7
 NUM_CARDS_IN_HAND = 5
+NUM_KINGDOM_CARDS = 10
 INITIAL_SUPPLY_COUNT = 10
 
 STARTING_VICTORY_CARD_SUPPLY_BY_PLAYER_COUNT = {
@@ -76,7 +77,8 @@ class GameController(object):
         """
         # TODO cards need hasRandomizer method
         randomizer_cards = [x for x in self.card_set if x.hasRandomizer()]
-        kingdom_cards = sample(randomizer_cards, 2) * INITIAL_SUPPLY_COUNT
+        num_to_sample = min(NUM_KINGDOM_CARDS, len(self.card_set))
+        kingdom_cards = sample(randomizer_cards, num_to_sample) * INITIAL_SUPPLY_COUNT
         treasure_cards = (
             [GoldCard] * STARTING_GOLD_SUPPLY +
             [SilverCard] * STARTING_SILVER_SUPPLY +
