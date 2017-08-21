@@ -13,9 +13,9 @@ class DumbMoneyAgent(BaseAgent):
     An agent that just buys money until it can buy Provinces. It follow these rules:
 
     - If I can buy Province I buy province
-    - If I can not buy Province I buy most expensive treasure except Copper
+    - If I cannot buy Province I buy most expensive treasure except Copper
     - Never buy Copper
-    - If I have to make an play action decision choose one randomly
+    - If I have to make a play action decision choose one randomly
     """
     def make_decision(self, decision):
         if isinstance(decision, PlayTreasureDecision):
@@ -37,7 +37,7 @@ class DumbMoneyAgent(BaseAgent):
 class SimpleBmSmithyAgent(BaseAgent):
     """
     An agent that opens with a Smithy and then buys Province when it can, otherwise the best
-    treasure available except Copper. Always plays Smithy from it's hand when possible.
+    treasure available except Copper. Always plays Smithy from its hand when possible.
     """
     def __init__(self, *args, **kwargs):
         super(SimpleBmSmithyAgent, self).__init__(*args, **kwargs)
