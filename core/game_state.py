@@ -423,3 +423,7 @@ class ViewableGameState:
 
     def get_location_info(self, location):
         return self._info_by_location.get(location, None)
+
+    def get_supply_distribution(self):
+        info = self.get_location_info(Location(None, LocationName.SUPPLY))
+        return info.stack.distribution

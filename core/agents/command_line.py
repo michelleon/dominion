@@ -1,4 +1,6 @@
 from core.agents.base import BaseAgent
+from core.card import Card
+from core.card import CardType
 from core.counters import CounterId
 from core.counters import CounterName
 from core.decision import BuyDecision
@@ -15,14 +17,32 @@ def _print_color(color, msg):
 
 
 class CommandLineAgent(BaseAgent):
+    def _print_location(self, known_state, location):
+        if known_state is None:
+            print('Location contents not known.')
+            return
+        location = Location(known_state.viewing_player, location)
+        info = known_state.get_location_info(location)
+        if info.stack:
+            print(','.join([str(card) for card in info.stack]))
+        else:
+            print('Location is empty')
+
     def _print_hand(self, known_state):
         print('\nYour Hand:')
-        if known_state is None:
-            print('Hand contents not known.')
-            return
-        location = Location(known_state.viewing_player, LocationName.HAND)
-        info = known_state.get_location_info(location)
-        print(','.join([str(card) for card in info.stack]))
+        self._print_location(known_state, LocationName.HAND)
+
+    def _print_supply(self, known_state):
+        distribution = known_state.get_supply_distribution()
+        print(distribution)
+
+    def _print_vp_supply(self, known_state):
+        cards_to_counts = known_state.get_supply_distribution().cards_to_counts()
+        for card in list(cards_to_counts.keys()):
+            if not card.has_type(CardType.VICTORY):
+                del cards_to_counts[card]
+
+        print(cards_to_counts)
 
     def _print_coins(self, known_state):
         if known_state is None:
@@ -48,6 +68,12 @@ class CommandLineAgent(BaseAgent):
                 choices = decision.options
             elif choice.strip() == 'hand':
                 self._print_hand(known_state)
+                continue
+            elif choice.strip() == 'vp':
+                self._print_vp_supply(known_state)
+                continue
+            elif choice.strip() == 'supply':
+                self._print_vp_supply(known_state)
                 continue
             else:
                 try:
