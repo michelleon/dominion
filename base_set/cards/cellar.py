@@ -13,7 +13,7 @@ class CellarDecision(Decision):
         cards = list(game_state.get_location(Location(player, LocationName.HAND)))
         self.options = cards
         self.min = 0
-        self.max = min(len(cards), 4)
+        self.max = len(cards)
 
 
 class CellarCard(KingdomCard):
@@ -26,6 +26,7 @@ class CellarCard(KingdomCard):
         Discard any number of cards, then draw that many
         +1 action
         """
+        game_state.update_counter(counter_id=CounterId(None, CounterName.ACTIONS), delta=1)
         decision = CellarDecision(game_state)
         agent = game_state.get_agent(game_state.get_current_player_name())
         chosen_cards = agent.make_decision(decision)
@@ -33,4 +34,3 @@ class CellarCard(KingdomCard):
 
         game_state.discard(chosen_cards)
         game_state.draw(len(chosen_cards))
-        game_state.update_counter(counter_id=CounterId(None, CounterName.ACTIONS), delta=1)
