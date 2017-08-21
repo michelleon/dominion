@@ -26,9 +26,9 @@ class Card(metaclass=Meta):
 	# Amount of victory points the card grants a player if it's static.
 	vp = 0
 
-	classmethod
+	@classmethod
 	def has_type(cls, card_type):
-		return card_type in types
+		return card_type in cls.types
 
 	@staticmethod
 	def hasRandomizer():
