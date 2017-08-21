@@ -399,7 +399,7 @@ Parameters:
 
 class ViewableGameState:
     """
-    Represents the state that a player can see. This is differnt from game state
+    Represents the state that a player can see. This is different from game state
     because it does not contain the complete state, only the state viewable by a specific
     player.
     """
