@@ -104,7 +104,7 @@ class GameController(object):
         next_index = (index + 1) % self.num_players
         return next_index
 
-    def next_player_index(self):
+    def increment_player_turn_index(self):
         next_player = self._increment_player_index(self.player_index)
         self.game_state._current_player_index = next_player
         return next_player
@@ -320,7 +320,7 @@ class GameController(object):
             # TODO: inform Players of after turn state for learning agents
             
             # rotate player index
-            self.player_index = self.next_player_index()
+            self.player_index = self.increment_player_turn_index()
             turn_number += 1
 
         #################
