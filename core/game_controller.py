@@ -2,7 +2,7 @@ import itertools
 from random import sample
 
 from core.card import CardType
-from core.card_distribution import CardDistribution
+from core.card_stack import UnorderedCardStack
 from core.counters import CounterId
 from core.counters import CounterName
 from core.decision import PlayActionDecision
@@ -31,6 +31,7 @@ NUM_EMPTY_PILES_FOR_GAME_END = 3
 NUM_ESTATES_IN_STARTING_HAND = 3
 NUM_COPPERS_IN_STARTING_HAND = 7
 NUM_CARDS_IN_HAND = 5
+NUM_KINGDOM_CARDS = 10
 INITIAL_SUPPLY_COUNT = 10
 
 STARTING_VICTORY_CARD_SUPPLY_BY_PLAYER_COUNT = {
@@ -58,12 +59,12 @@ class GameController(object):
         self.players = players # array of agents
         self.num_players = len(players)
         # all agents need to implement a .name() method
-        self.game_over = False
         self.game_state = None
         # Array of cards that kingdom will be chosen from
         self.card_set = card_set
         # Player index = index of player whose turn it is 
         self.player_index = 0 # TODO: randomize start player
+        self.starting_player_index = self.player_index
         self.log = log
 
 
@@ -76,7 +77,8 @@ class GameController(object):
         """
         # TODO cards need hasRandomizer method
         randomizer_cards = [x for x in self.card_set if x.hasRandomizer()]
-        kingdom_cards = sample(randomizer_cards, 10) * INITIAL_SUPPLY_COUNT
+        num_to_sample = min(NUM_KINGDOM_CARDS, len(self.card_set))
+        kingdom_cards = sample(randomizer_cards, num_to_sample) * INITIAL_SUPPLY_COUNT
         treasure_cards = (
             [GoldCard] * STARTING_GOLD_SUPPLY +
             [SilverCard] * STARTING_SILVER_SUPPLY +
@@ -90,7 +92,7 @@ class GameController(object):
         curse_starting_supply = STARTING_CURSE_SUPPLY_BY_PLAYER_COUNT[self.num_players]
         curse_cards = [CurseCard] * curse_starting_supply
         # TODO: how to handle gardens etc. which depend on num_players
-        return CardDistribution(kingdom_cards + treasure_cards + flattened_victory_cards + curse_cards)
+        return UnorderedCardStack(kingdom_cards + treasure_cards + flattened_victory_cards)
 
     def get_starting_deck(self):
         return (
@@ -98,8 +100,14 @@ class GameController(object):
             [EstateCard] * NUM_ESTATES_IN_STARTING_HAND
         )
 
-    def next_player_index(self):
-        return ( self.player_index + 1 ) % self.num_players
+    def _increment_player_index(self, index):
+        next_index = (index + 1) % self.num_players
+        return next_index
+
+    def increment_player_turn_index(self):
+        next_player = self._increment_player_index(self.player_index)
+        self.game_state._current_player_index = next_player
+        return next_player
 
     def actions_left(self):
         return self.game_state.get_counter(CounterId(None, CounterName.ACTIONS))
@@ -107,12 +115,21 @@ class GameController(object):
     def buys_left(self):
         return self.game_state.get_counter(CounterId(None, CounterName.BUYS))
 
-    def money_in_play(self, player):
+    def money_in_play(self):
         return self.game_state.get_counter(CounterId(None, CounterName.COINS))
 
     def action_cards_in_hand(self, player):
         hand = self.game_state.get_location(Location(player.name(), LocationName.HAND))
-        return [card for card in hand if CardType.ACTION in card.types()]
+        return [card for card in hand if CardType.ACTION in card.types]
+
+    def game_over(self):
+        supply = self.game_state.get_location(Location(None, LocationName.SUPPLY))
+        if supply.distribution.count(ProvinceCard) == 0:
+            return True
+        cards_to_counts = supply.distribution.cards_to_counts()
+        if list(cards_to_counts.values()).count(0) >= 3:
+            return True
+        return False
 
     def generate_buy_decision(self, player):
         """
@@ -124,8 +141,7 @@ class GameController(object):
             supply cards that the player can afford
         """
         money = self.money_in_play()
-        # TODO: get_available_cards impl in controller or state?
-        available_cards = self.game_state.get_available_cards()
+        available_cards = set(list(self.game_state.get_location(Location(None, LocationName.SUPPLY))))
         affordable_cards = [card for card in available_cards if card.cost(self.game_state) <= money]
         return BuyDecision(options=affordable_cards, min=0, max=1)
 
@@ -159,7 +175,10 @@ class GameController(object):
 
         Moves card from supply to player discard pile
         """
-        pass
+        cost = card.cost(self.game_state)
+        self.game_state.update_counter(CounterId(None, CounterName.BUYS), -1)
+        self.game_state.update_counter(CounterId(None, CounterName.COINS), 0 - cost)
+        self.game_state.gain(card)
 
     def play_treasures(self, player, treasures):
         """
@@ -170,7 +189,9 @@ class GameController(object):
         Moves cards from HAND to IN_PLAY
         Increments COINS counter by the sum of `treasures`
         """
-        pass
+        for treasure in treasures:
+            self.game_state.play(treasure)
+            treasure.play(self.game_state)
 
     def player_name_to_vp(self):
         """
@@ -178,17 +199,52 @@ class GameController(object):
         Returns: map of player name to VP
         """
         player_name_to_vp = {}
-        for player_name in self.players.map(lambda p: p.name()):
+        for player_name in list(map(lambda p: p.name(), self.players)):
             deck = self.game_state.get_deck(player_name)
             victory_points = sum([card.victory_points(player_name, self.game_state) for card in deck])
             player_name_to_vp[player_name] = victory_points
+        return player_name_to_vp
 
-    def get_winner(self):
+    def get_winner_indices(self, start_turn_index, next_turn_index, scores):
         """
-        Returns player name with most VP
+        Returns a list of the indices of the winning players. There can be multiple if there is a tie.
+
+        Parameters:
+            start_turn_index (int): The index of the player that started first.
+            next_turn_index (int): The index of the player whose turn would be next if the game
+                wasn't over.
+            scores (list of int): The final score for each player. The score at index i is the
+                score for the player at index i.
+        """
+        top_score = max(scores)
+        cur_index = next_turn_index
+        players_have_one_less_turn = True
+        winners = []
+        while True:
+            if cur_index == start_turn_index:
+                if winners:
+                    return winners
+                players_have_one_less_turn = False
+            if scores[cur_index] == top_score:
+                winners.append(cur_index)
+            cur_index = self._increment_player_index(cur_index)
+            if cur_index == next_turn_index:
+                break
+        return winners
+
+    def get_winners(self):
+        """
+        Returns a list of the winning player names.
         """
         player_name_to_vp = self.player_name_to_vp()
-        return max(player_name_to_vp.keys(), key=(lambda k: player_name_to_vp[k]))
+        scores = []
+        for player in self.players:
+            scores.append(player_name_to_vp[player.name()])
+        winner_indices = self.get_winner_indices(
+            self.starting_player_index, self.player_index, scores
+        )
+        winners = [self.players[ind].name() for ind in winner_indices]
+        return winners
 
     def run(self):
         """
@@ -206,33 +262,39 @@ class GameController(object):
             starting_deck,
             self.log
         )
-
         # TODO: inform Players of initial state for learning agents
+        self.game_state.set_agents(self.players)
         for player in self.players:
             # shuffle player decks
             self.game_state.shuffle(Location(player.name(), LocationName.DRAW_PILE))
             # draw starting hands
-            self.game_state.draw(player.name(), NUM_CARDS_IN_HAND)   
+            self.game_state.draw(NUM_CARDS_IN_HAND, player.name())
 
         #################
         # Gameplay loop
         #################
-        
-        while not self.game_over:
+        turn_number = 1
+        while not self.game_over():
             # Fetch the next player
             player = self.players[self.player_index]
+            ### Setup Phase
+            self.game_state.reset_counters_for_new_turn()
 
             ### Action phase
+
             while (
                 self.actions_left() > 0 and
                 len(self.action_cards_in_hand(player)) > 0
             ):
                 decision = self.generate_action_decision(player)
-                action_card = player.make_decision(decision)[0]
+                choices = player.make_decision(decision)
+                action_card = choices[0] if choices else None
                 # TODO: validate choice legality
                 if not action_card:
                     break
-                action_card.execute(self.game_state)
+                self.game_state.update_counter(CounterId(None, CounterName.ACTIONS), -1)
+                self.game_state.play(action_card)
+                action_card.play(self.game_state)
 
             ### Buy phase
             decision = self.generate_play_treasures_decision(player)
@@ -241,7 +303,8 @@ class GameController(object):
 
             while self.buys_left() > 0:
                 decision = self.generate_buy_decision(player)
-                choice = player.make_decision(decision)[0]
+                choices = player.make_decision(decision)
+                choice = choices[0] if choices else None
                 # TODO: validate choice legality
                 if not choice:
                     break
@@ -252,18 +315,27 @@ class GameController(object):
             self.game_state.discard_location(Location(player.name(), LocationName.HAND))
 
             ### Draw next hand
-            self.game_state.draw(player.name(), NUM_CARDS_IN_HAND)
+            self.game_state.draw(NUM_CARDS_IN_HAND, player.name())
 
             # TODO: inform Players of after turn state for learning agents
             
             # rotate player index
-            self.player_index = self.next_player_index()
+            self.player_index = self.increment_player_turn_index()
+            turn_number += 1
 
         #################
         # Resolve game
         #################
-        print(self.player_name_to_vp())
-        print(self.get_winner())
+        print('\nGAME OVER on Turn %d\n-----------------\n' % (turn_number / 2))
+        for name, vp in self.player_name_to_vp().items():
+            print('%s: %d' % (name, vp))
+        winners = self.get_winners()
+        if len(winners) == 1:
+            print('Winner: ' + winners[0])
+        elif len(winners) == 2:
+            tied_player_names = ' and '.join(winners)
+            print('Tie between %s' % tied_player_names)
+        return winners
 
 
 
