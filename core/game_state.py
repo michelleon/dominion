@@ -318,6 +318,8 @@ class GameState:
         Causes the player to discard the cards. The first card in the list will be the one
         on top of the discard pile after discarding them.
         """
+        if not cards:
+            return
         player = player or self.get_current_player_name()
         location = location or Location(player, LocationName.HAND)
         self.move(

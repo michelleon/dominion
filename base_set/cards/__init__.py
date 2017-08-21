@@ -1,3 +1,4 @@
+from base_set.cards.cellar import CellarCard
 from base_set.cards.chapel import ChapelCard
 from base_set.cards.copper import CopperCard
 from base_set.cards.curse import CurseCard
@@ -23,6 +24,7 @@ ALL_CARDS = [
     CopperCard, SilverCard, GoldCard,
     EstateCard, DuchyCard, ProvinceCard,
     CurseCard,
+    CellarCard,
     ChapelCard,
     MarketCard,
     MoneyLenderCard,
