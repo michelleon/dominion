@@ -33,6 +33,7 @@ NUM_COPPERS_IN_STARTING_HAND = 7
 NUM_CARDS_IN_HAND = 5
 NUM_KINGDOM_CARDS = 10
 INITIAL_SUPPLY_COUNT = 10
+MAX_TURNS = 300
 
 STARTING_VICTORY_CARD_SUPPLY_BY_PLAYER_COUNT = {
     2: 8,
@@ -205,6 +206,14 @@ class GameController(object):
             player_name_to_vp[player_name] = victory_points
         return player_name_to_vp
 
+    def give_decision(self, decision, agent):
+        """
+        Give the agent a decision and return it's choices.
+        """
+        viewable_state = self.game_state.get_state_known_to(agent.name())
+        choices = agent.make_decision(decision, viewable_state)
+        return choices
+
     def get_winner_indices(self, start_turn_index, next_turn_index, scores):
         """
         Returns a list of the indices of the winning players. There can be multiple if there is a tie.
@@ -287,7 +296,7 @@ class GameController(object):
                 len(self.action_cards_in_hand(player)) > 0
             ):
                 decision = self.generate_action_decision(player)
-                choices = player.make_decision(decision)
+                choices = self.give_decision(decision, player)
                 action_card = choices[0] if choices else None
                 # TODO: validate choice legality
                 if not action_card:
@@ -298,12 +307,12 @@ class GameController(object):
 
             ### Buy phase
             decision = self.generate_play_treasures_decision(player)
-            treasures = player.make_decision(decision) # expect choice to be arr of treasure cards
+            treasures = self.give_decision(decision, player)
             self.play_treasures(player, treasures)
 
             while self.buys_left() > 0:
                 decision = self.generate_buy_decision(player)
-                choices = player.make_decision(decision)
+                choices = self.give_decision(decision, player)
                 choice = choices[0] if choices else None
                 # TODO: validate choice legality
                 if not choice:
@@ -322,6 +331,9 @@ class GameController(object):
             # rotate player index
             self.player_index = self.increment_player_turn_index()
             turn_number += 1
+            # Safety to avoid bots getting stuck in infinite game.
+            if turn_number > MAX_TURNS:
+                break
 
         #################
         # Resolve game

@@ -149,6 +149,30 @@ class GameStateTest(unittest.TestCase):
         game_state.discard_location(Location(current_player, LocationName.IN_PLAY))
         self.assertEqual(in_play.size(), 0)
 
+    def test_get_state_known_to(self):
+        game_state = self.create_default_game_state()
+        current_player = game_state.get_current_player_name()
+        viewable_state = game_state.get_state_known_to(current_player)
+        hand_location = Location(current_player, LocationName.HAND)
+        real_hand = game_state.get_location(hand_location)
+        hand_info = viewable_state.get_location_info(hand_location)
+        self.assertEqual(hand_info.size, real_hand.size())
+        self.assertEqual(hand_info.stack.distribution, real_hand.distribution,
+            'Player can see the cards in their own hand.')
+        self.assertNotEqual(hand_info.stack, real_hand,
+            'Hand stack is a copy and not the one owned by game state.')
+
+        other_player = 'p1' if current_player == 'p2' else 'p2'
+        other_viewable_state = game_state.get_state_known_to(other_player)
+        hand_location = Location(current_player, LocationName.HAND)
+        real_hand = game_state.get_location(hand_location)
+        hand_info = other_viewable_state.get_location_info(hand_location)
+        self.assertEqual(hand_info.size, real_hand.size(),
+            'Player can see size of opponent\'s hand')
+        self.assertEqual(hand_info.stack, None,
+            'Player can not see contents of opponent\'s hand.')
+
+
 
 if __name__ == '__main__':
     unittest.main()

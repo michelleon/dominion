@@ -97,6 +97,15 @@ class CardStackTest(unittest.TestCase):
             'Distribution should be empty after emptying.'
         )
 
+    def test_peek(self):
+        stack = CardStack(['a', 'b', 'c'])
+        self.assertEqual(stack.peek(0), 'a')
+        self.assertEqual(stack.peek(1), 'b')
+        self.assertEqual(stack.size(), 3)
+        stack.draw(1)
+        self.assertEqual(stack.peek(0), 'b')
+        self.assertEqual(stack.peek(1), 'c')
+
 
 class UnorderedCardStackTest(unittest.TestCase):
     def test_add(self):
