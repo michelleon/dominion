@@ -19,14 +19,14 @@ def _print_color(color, msg):
 class CommandLineAgent(BaseAgent):
     def _print_location(self, known_state, location):
         if known_state is None:
-            print('Location contents not known.')
+            print('%s contents not known.' % location.name)
             return
         location = Location(known_state.viewing_player, location)
         info = known_state.get_location_info(location)
         if info.stack:
             print(','.join([str(card) for card in info.stack]))
         else:
-            print('Location is empty')
+            print('%s is empty.' % location.name.name)
 
     def _print_hand(self, known_state):
         print('\nYour Hand:')
@@ -73,7 +73,7 @@ class CommandLineAgent(BaseAgent):
                 self._print_vp_supply(known_state)
                 continue
             elif choice.strip() == 'supply':
-                self._print_vp_supply(known_state)
+                self._print_supply(known_state)
                 continue
             else:
                 try:
