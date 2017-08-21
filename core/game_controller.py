@@ -64,6 +64,7 @@ class GameController(object):
         self.card_set = card_set
         # Player index = index of player whose turn it is 
         self.player_index = 0 # TODO: randomize start player
+        self.starting_player_index = self.player_index
         self.log = log
 
 
@@ -99,8 +100,12 @@ class GameController(object):
             [EstateCard] * NUM_ESTATES_IN_STARTING_HAND
         )
 
+    def _increment_player_index(self, index):
+        next_index = (index + 1) % self.num_players
+        return next_index
+
     def next_player_index(self):
-        next_player = ( self.player_index + 1 ) % self.num_players
+        next_player = self._increment_player_index(self.player_index)
         self.game_state._current_player_index = next_player
         return next_player
 
@@ -200,15 +205,46 @@ class GameController(object):
             player_name_to_vp[player_name] = victory_points
         return player_name_to_vp
 
-    def get_winner(self):
+    def get_winner_indices(self, start_turn_index, next_turn_index, scores):
         """
-        Returns player name with most VP
+        Returns a list of the indices of the winning players. There can be multiple if there is a tie.
+
+        Parameters:
+            start_turn_index (int): The index of the player that started first.
+            next_turn_index (int): The index of the player whose turn would be next if the game
+                wasn't over.
+            scores (list of int): The final score for each player. The score at index i is the
+                score for the player at index i.
+        """
+        top_score = max(scores)
+        cur_index = next_turn_index
+        players_have_one_less_turn = True
+        winners = []
+        while True:
+            if cur_index == start_turn_index:
+                if winners:
+                    return winners
+                players_have_one_less_turn = False
+            if scores[cur_index] == top_score:
+                winners.append(cur_index)
+            cur_index = self._increment_player_index(cur_index)
+            if cur_index == next_turn_index:
+                break
+        return winners
+
+    def get_winners(self):
+        """
+        Returns a list of the winning player names.
         """
         player_name_to_vp = self.player_name_to_vp()
-        scores = list(player_name_to_vp.values())
-        if len(scores) == 2 and scores[0] == scores[1]:
-            return None
-        return max(player_name_to_vp.keys(), key=(lambda k: player_name_to_vp[k]))
+        scores = []
+        for player in self.players:
+            scores.append(player_name_to_vp[player.name()])
+        winner_indices = self.get_winner_indices(
+            self.starting_player_index, self.player_index, scores
+        )
+        winners = [self.players[ind].name() for ind in winner_indices]
+        return winners
 
     def run(self):
         """
@@ -293,9 +329,13 @@ class GameController(object):
         print('\nGAME OVER on Turn %d\n-----------------\n' % (turn_number / 2))
         for name, vp in self.player_name_to_vp().items():
             print('%s: %d' % (name, vp))
-        winner = self.get_winner()
-        print(('Winner: ' + winner) if winner else 'Tie')
-        return winner 
+        winners = self.get_winners()
+        if len(winners) == 1:
+            print('Winner: ' + winners[0])
+        elif len(winners) == 2:
+            tied_player_names = ' and '.join(winners)
+            print('Tie between %s' % tied_player_names)
+        return winners
 
 
 

@@ -35,6 +35,40 @@ class GameControllerTest(unittest.TestCase):
         controller = self.create_controller()
         winner = controller.run()
 
+    def test_get_winner_indices(self):
+        controller = self.create_controller()
+        winners = controller.get_winner_indices(
+            start_turn_index=0, next_turn_index=0, scores=[10, 10]
+        )
+        self.assertEqual(
+            set(winners), set([0, 1]),
+            'If score is tied and both players had the same number of turns then they tie.'
+        )
+
+        winners = controller.get_winner_indices(
+            start_turn_index=0, next_turn_index=1, scores=[10, 10]
+        )
+        self.assertEqual(
+            winners, [1],
+            'If score is tied and one player had fewer turns then they win.'
+        )
+
+        winners = controller.get_winner_indices(
+            start_turn_index=1, next_turn_index=0, scores=[10, 10]
+        )
+        self.assertEqual(
+            winners, [0],
+            'If score is tied and one player had fewer turns then they win.'
+        )
+
+        winners = controller.get_winner_indices(
+            start_turn_index=0, next_turn_index=1, scores=[11, 10]
+        )
+        self.assertEqual(
+            winners, [0],
+            'If one player had more turns but also has more points then they win.'
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
