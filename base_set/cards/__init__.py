@@ -6,6 +6,7 @@ from base_set.cards.duchy import DuchyCard
 from base_set.cards.estate import EstateCard
 from base_set.cards.gold import GoldCard
 from base_set.cards.harbinger import HarbingerCard
+from base_set.cards.laboratory import LaboratoryCard
 from base_set.cards.market import MarketCard
 from base_set.cards.moneylender import MoneyLenderCard
 from base_set.cards.province import ProvinceCard
@@ -28,6 +29,7 @@ ALL_CARDS = [
     CellarCard,
     ChapelCard,
     HarbingerCard,
+    LaboratoryCard,
     MarketCard,
     MoneyLenderCard,
     SmithyCard,
