@@ -10,5 +10,9 @@ class LaboratoryCard(KingdomCard):
 
     @classmethod
     def play(cls, game_state):
+        """
+        +2 cards
+        +1 action
+        """
         game_state.draw(2)
         game_state.update_counter(counter_id=CounterId(None, CounterName.ACTIONS), delta=1)
