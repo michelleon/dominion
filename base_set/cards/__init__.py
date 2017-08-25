@@ -12,6 +12,7 @@ from base_set.cards.moneylender import MoneyLenderCard
 from base_set.cards.province import ProvinceCard
 from base_set.cards.silver import SilverCard
 from base_set.cards.smithy import SmithyCard
+from base_set.cards.vassal import VassalCard
 from base_set.cards.village import VillageCard
 from core.card import Card
 from core.card import CardType
@@ -33,6 +34,7 @@ ALL_CARDS = [
     MarketCard,
     MoneyLenderCard,
     SmithyCard,
+    VassalCard,
     VillageCard
 ]
 KINGDOM_CARDS = [

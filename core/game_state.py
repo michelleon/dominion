@@ -269,14 +269,23 @@ class GameState:
         event = ShuffleEvent(location)
         self.logger.log(event)
 
-    def draw(self, number, player=None):
+    def prepare_for_draw(self, number, player=None):
         """
-        Draws `number` cards to the given player's hand.
+        Prepare the player's draw pile for taking number cards from it by shuffling in the
+        discard pile if needed.
         """
         player = player or self.get_current_player_name()
         draw_stack = self.get_location(Location(player, LocationName.DRAW_PILE))
         if draw_stack.size() < number:
             self._shuffle_discard_into_draw(player)
+
+    def draw(self, number, player=None):
+        """
+        Draws `number` cards to the given player's hand.
+        """
+        player = player or self.get_current_player_name()
+        self.prepare_for_draw(number, player)
+        draw_stack = self.get_location(Location(player, LocationName.DRAW_PILE))
         number_to_draw = min(number, draw_stack.size())
         if number_to_draw == 0:
             return
