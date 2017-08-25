@@ -14,6 +14,7 @@ from base_set.cards.silver import SilverCard
 from base_set.cards.smithy import SmithyCard
 from base_set.cards.vassal import VassalCard
 from base_set.cards.village import VillageCard
+from base_set.cards.workshop import WorkshopCard
 from core.card import Card
 from core.card import CardType
 from core.card import KingdomCard
@@ -35,7 +36,8 @@ ALL_CARDS = [
     MoneyLenderCard,
     SmithyCard,
     VassalCard,
-    VillageCard
+    VillageCard,
+    WorkshopCard,
 ]
 KINGDOM_CARDS = [
     card for card in ALL_CARDS if card.hasRandomizer()
