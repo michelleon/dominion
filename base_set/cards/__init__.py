@@ -4,6 +4,7 @@ from base_set.cards.copper import CopperCard
 from base_set.cards.curse import CurseCard
 from base_set.cards.duchy import DuchyCard
 from base_set.cards.estate import EstateCard
+from base_set.cards.gardens import GardensCard
 from base_set.cards.gold import GoldCard
 from base_set.cards.harbinger import HarbingerCard
 from base_set.cards.laboratory import LaboratoryCard
@@ -30,6 +31,7 @@ ALL_CARDS = [
     CurseCard,
     CellarCard,
     ChapelCard,
+    GardensCard,
     HarbingerCard,
     LaboratoryCard,
     MarketCard,
