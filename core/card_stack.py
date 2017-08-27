@@ -1,5 +1,4 @@
 from collections import deque
-from copy import deepcopy
 from random import shuffle
 import enum
 
@@ -92,7 +91,7 @@ class CardStack:
     def deepcopy(self):
         card_stack = CardStack()
         card_stack.distribution = self.distribution.deepcopy()
-        card_stack._stack = deepcopy(self._stack)
+        card_stack._stack = deque(self._stack)
         return card_stack
 
 

@@ -1,5 +1,4 @@
 from collections import Counter
-from copy import deepcopy
 
 
 class CardDistribution:
@@ -42,7 +41,7 @@ class CardDistribution:
 
     def deepcopy(self):
         distribution = CardDistribution()
-        distribution._card_counter = deepcopy(self._card_counter)
+        distribution._card_counter = self._card_counter.copy()
         return distribution 
 
     def __eq__(self, other):
