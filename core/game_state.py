@@ -365,18 +365,19 @@ class GameState:
             event_type=CardEventType.BUY  
         )
 
-    def gain(self, card, player=None):
+    def gain(self, card, player=None, to_location=None, to_position=None):
         """
         Causes the player to gain the card.
         """
         player = player or self.get_current_player_name()
+        to_location = to_location or Location(player, LocationName.DISCARD)
         self.move(
             cards=[card],
             number=None,
             from_location=Location(None, LocationName.SUPPLY),
             from_position=None,
-            to_location=Location(player, LocationName.DISCARD),
-            to_position=None,
+            to_location=to_location,
+            to_position=to_position,
             event_type=CardEventType.GAIN  
         )
 
