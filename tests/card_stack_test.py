@@ -106,6 +106,13 @@ class CardStackTest(unittest.TestCase):
         self.assertEqual(stack.peek(0), 'b')
         self.assertEqual(stack.peek(1), 'c')
 
+    def test_peek_from_position(self):
+        stack = CardStack(['a', 'b', 'c'])
+        self.assertEqual(stack.peek_from_position(StackPosition.BOTTOM), ['c'])
+        self.assertEqual(stack.peek_from_position(StackPosition.TOP), ['a'])
+        self.assertEqual(stack.peek_from_position(StackPosition.TOP, 3), ['a', 'b', 'c'])
+        stack.draw(1)
+        self.assertEqual(stack.peek_from_position(StackPosition.TOP), ['b'])
 
 class UnorderedCardStackTest(unittest.TestCase):
     def test_add(self):

@@ -85,6 +85,19 @@ class CardStack:
         """
         return self._stack[index]
 
+    def peek_from_position(self, position, number=1):
+        """
+        See what cards are at the position without moving them.
+
+        Parameters:
+            position (`StackPosition`): Position to peek from (e.g. `TOP`)
+            number (`int`): Number of cards peek at. Defaults to 1
+        """
+        # TODO (michelle): inefficient to create a new list, itertools.islice?
+        if position == StackPosition.TOP:
+            return list(self._stack)[:number]
+        return list(self._stack)[-1 * number:]
+
     def size(self):
         return len(self._stack)
 
