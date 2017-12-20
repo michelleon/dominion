@@ -29,7 +29,7 @@ class VassalCard(KingdomCard):
     def play(cls, game_state):
         player = game_state.get_current_player_name()
         game_state.update_counter(counter_id=CounterId(None, CounterName.COINS), delta=2)
-        game_state.prepare_for_draw(1)
+        game_state.shuffle_discard_in_if_insufficient_cards(1)
         draw_stack = game_state.get_location(Location(player, LocationName.DRAW_PILE))
         if draw_stack.size() < 1:
             return

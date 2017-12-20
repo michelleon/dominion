@@ -58,6 +58,7 @@ CardKnowledgeEvent = namedtuple('CardKnowledgeEvent', [
     'cards',
     'from_location',
     'from_position',
+    'number',
     'type',
 ])
 CardKnowledgeEvent.__doc__ = """
@@ -68,6 +69,7 @@ Parameters:
     cards (list of `Card`): List of cards the players saw.
     from_location (`Location`): Location the cards are located in.
     from_position (`StackPosition`): Position of the cards in the location.
+    number (`int`): Number of cards revealed
     type (`KnowledgeEventType`): Type of the event. Some cards may be triggered depending on the
         way the knowledge event is defined.
 """
