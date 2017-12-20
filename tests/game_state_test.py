@@ -1,6 +1,7 @@
 import random
 import unittest
 
+from base_set.cards import SilverCard
 from core.card_distribution import CardDistribution
 from core.card_stack import StackPosition
 from core.card_stack import UnorderedCardStack
@@ -172,6 +173,14 @@ class GameStateTest(unittest.TestCase):
         self.assertEqual(hand_info.stack, None,
             'Player can not see contents of opponent\'s hand.')
 
+    def test_gain_to_top_of_deck(self):
+        game_state = self.create_default_game_state()
+        original_deck = game_state.get_deck(game_state.get_current_player_name())
+        game_state.gain_to_top_of_deck(SilverCard)
+        new_deck = game_state.get_deck(game_state.get_current_player_name())
+        self.assertEqual(len(new_deck), len(original_deck) + 1)
+        self.assertEqual(new_deck[0], SilverCard)
+        self.assertEqual(new_deck[1:], original_deck)
 
 
 if __name__ == '__main__':

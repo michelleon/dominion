@@ -381,6 +381,21 @@ class GameState:
             event_type=CardEventType.GAIN  
         )
 
+    def gain_to_top_of_deck(self, card, player=None):
+        """
+        Causes the player to gain the card to the top of their draw pile
+        """
+        player = player or self.get_current_player_name()
+        self.move(
+            cards=[card],
+            number=None,
+            from_location=Location(None, LocationName.SUPPLY),
+            from_position=None,
+            to_location=Location(player, LocationName.DISCARD),
+            to_position=None,
+            event_type=CardEventType.GAIN
+        )
+
     def trash(self, card, player=None):
         """
         Causes the player to trash the card.
