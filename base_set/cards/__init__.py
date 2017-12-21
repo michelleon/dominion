@@ -11,6 +11,7 @@ from base_set.cards.laboratory import LaboratoryCard
 from base_set.cards.market import MarketCard
 from base_set.cards.mine import MineCard
 from base_set.cards.moneylender import MoneyLenderCard
+from base_set.cards.poacher import PoacherCard
 from base_set.cards.province import ProvinceCard
 from base_set.cards.silver import SilverCard
 from base_set.cards.smithy import SmithyCard
@@ -38,6 +39,7 @@ ALL_CARDS = [
     MarketCard,
     MineCard,
     MoneyLenderCard,
+    PoacherCard,
     SmithyCard,
     VassalCard,
     VillageCard,
