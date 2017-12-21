@@ -1,10 +1,14 @@
 import random
 import unittest
 
+from base_set.cards import SilverCard
+from core.agents.test import TestAgent
 from core.card_distribution import CardDistribution
 from core.card_stack import StackPosition
 from core.card_stack import UnorderedCardStack
 from core.events import CardEventType
+from core.events import CardKnowledgeEvent
+from core.events import CardKnowledgeEventType
 from core.events import CardMoveEvent
 from core.events import ShuffleEvent
 from core.game_state import GameState
@@ -33,6 +37,7 @@ class GameStateTest(unittest.TestCase):
         game_state = GameState(
             player_names=names, supply=supply, starting_deck=[], logger=logger
         )
+        game_state.set_agents([TestAgent(name) for name in names])
         return game_state
 
     def test_create_game_state(self):
@@ -172,6 +177,35 @@ class GameStateTest(unittest.TestCase):
         self.assertEqual(hand_info.stack, None,
             'Player can not see contents of opponent\'s hand.')
 
+    def test_gain_to_top_of_deck(self):
+        game_state = self.create_default_game_state()
+        original_deck = game_state.get_location(
+            Location(game_state.get_current_player_name(), LocationName.DRAW_PILE)
+        )
+        original_deck.add(1)
+        original_size = original_deck.size()
+        game_state.gain_to_top_of_deck(SilverCard)
+        new_deck = game_state.get_deck(game_state.get_current_player_name())
+        self.assertEqual(len(new_deck), original_size + 1)
+        self.assertEqual(new_deck[0], SilverCard)
+        self.assertEqual(new_deck[1:], [1])
+
+    def test_reveal_hand(self):
+        game_state = self.create_default_game_state()
+        hand_location = Location(game_state.get_current_player_name(), LocationName.HAND)
+        hand = game_state.get_location(hand_location)
+        game_state.reveal_hand(game_state.get_current_player_name())
+        expected_hand_reveal_event = CardKnowledgeEvent(
+            ['p1', 'p2'],
+            list(hand),
+            hand_location,
+            None,
+            CardKnowledgeEventType.REVEAL
+        )
+        self.assertEqual(
+            game_state.logger.get_log(), [expected_hand_reveal_event],
+            'Expected hand reveal event logged.'
+        )
 
 
 if __name__ == '__main__':

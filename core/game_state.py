@@ -7,6 +7,8 @@ from core.counters import CounterId
 from core.counters import CounterName
 from core.counters import GLOBAL_COUNTERS
 from core.events import CardEventType
+from core.events import CardKnowledgeEvent
+from core.events import CardKnowledgeEventType
 from core.events import CardMoveEvent
 from core.events import CounterEvent
 from core.events import CounterEventType
@@ -159,6 +161,12 @@ class GameState:
             if agent.name() == name:
                 return agent
 
+    def get_agents_besides_current_player(self):
+        return [agent for agent in self._agents if agent.name() != self.get_current_player_name()]
+
+    def get_agent_names(self):
+        return [agent.name() for agent in self._agents]
+
     def get_current_player_name(self):
         """
         Return the name of the player whose turn it is. This is not necessarily the player
@@ -251,14 +259,38 @@ class GameState:
         self._counters[counter_id] = value
         event = CounterEvent(counter_id, CounterEventType.SET, value)
         
-    def reveal(self, location, cards, position, number):
+    def reveal(self, location, position=None, number=None):
         """
         Reveal a card or cards to all players.
 
         Parameters:
-            ToDo
+            location (`Location`): Location to reveal
+            position (`StackPosition`): Position to reveal from (e.g. `TOP`) 
+            number (`int`): Number of cards to reveal 
         """
-        pass
+        players = self.get_agent_names()
+        cards = None
+        card_stack = self.get_location(location)
+        if number and location.type == LocationName.DRAW_PILE:
+            self.shuffle_discard_in_if_insufficient_cards(number)
+        if position and number:
+            cards = card_stack.peek_from_position(position, number)
+
+        self.logger.log(
+            CardKnowledgeEvent(
+                players,
+                cards or list(card_stack),
+                location,
+                position,
+                CardKnowledgeEventType.REVEAL
+            )
+        )
+
+    def reveal_hand(self, player_name):
+        """
+        Reveals player's hand to all other players.
+        """
+        self.reveal(Location(player_name, LocationName.HAND))
 
     def shuffle(self, location):
         """
@@ -269,7 +301,7 @@ class GameState:
         event = ShuffleEvent(location)
         self.logger.log(event)
 
-    def prepare_for_draw(self, number, player=None):
+    def shuffle_discard_in_if_insufficient_cards(self, number, player=None):
         """
         Prepare the player's draw pile for taking number cards from it by shuffling in the
         discard pile if needed.
@@ -284,7 +316,7 @@ class GameState:
         Draws `number` cards to the given player's hand.
         """
         player = player or self.get_current_player_name()
-        self.prepare_for_draw(number, player)
+        self.shuffle_discard_in_if_insufficient_cards(number, player)
         draw_stack = self.get_location(Location(player, LocationName.DRAW_PILE))
         number_to_draw = min(number, draw_stack.size())
         if number_to_draw == 0:
@@ -379,6 +411,21 @@ class GameState:
             to_location=to_location,
             to_position=to_position,
             event_type=CardEventType.GAIN  
+        )
+
+    def gain_to_top_of_deck(self, card, player=None):
+        """
+        Causes the player to gain the card to the top of their draw pile
+        """
+        player = player or self.get_current_player_name()
+        self.move(
+            cards=[card],
+            number=None,
+            from_location=Location(None, LocationName.SUPPLY),
+            from_position=None,
+            to_location=Location(player, LocationName.DRAW_PILE),
+            to_position=StackPosition.TOP,
+            event_type=CardEventType.GAIN
         )
 
     def trash(self, card, player=None):
