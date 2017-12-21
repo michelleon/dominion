@@ -164,6 +164,9 @@ class GameState:
     def get_agents_besides_current_player(self):
         return [agent for agent in self._agents if agent.name() != self.get_current_player_name()]
 
+    def get_agent_names(self):
+        return [agent.name() for agent in self._agents]
+
     def get_current_player_name(self):
         """
         Return the name of the player whose turn it is. This is not necessarily the player
@@ -265,7 +268,7 @@ class GameState:
             position (`StackPosition`): Position to reveal from (e.g. `TOP`) 
             number (`int`): Number of cards to reveal 
         """
-        players = [agent.name() for agent in self.get_agents_besides_current_player()]
+        players = self.get_agent_names()
         cards = None
         card_stack = self.get_location(location)
         if number and location.type == LocationName.DRAW_PILE:
@@ -279,7 +282,6 @@ class GameState:
                 cards or list(card_stack),
                 location,
                 position,
-                number or card_stack.size(),
                 CardKnowledgeEventType.REVEAL
             )
         )

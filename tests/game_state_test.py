@@ -196,11 +196,10 @@ class GameStateTest(unittest.TestCase):
         hand = game_state.get_location(hand_location)
         game_state.reveal_hand(game_state.get_current_player_name())
         expected_hand_reveal_event = CardKnowledgeEvent(
-            ['p2'],
+            ['p1', 'p2'],
             list(hand),
             hand_location,
             None,
-            hand.size(),
             CardKnowledgeEventType.REVEAL
         )
         self.assertEqual(
