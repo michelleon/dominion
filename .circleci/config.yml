@@ -1,0 +1,8 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.7.4
+    steps:
+      - run: git clone https://github.com/michelleon/dominion.git
+      - run: cd dominion && python -m unittest tests/*.py
